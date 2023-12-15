@@ -1,8 +1,26 @@
+import os
+
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask
+from flask import Flask, render_template
+from dotenv import load_dotenv
+# pip install python-dotenv
+from flask_mail import Mail, Message
+
+#  pip install flask_mail
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config["FLASKY_MAIL_SUBJECT"] = '[Apka]'
+app.config["FLASKY_MAIL_SENDER"] = os.getenv('MAIL_USERNAME')
+
+mail = Mail(app)
 db = SQLAlchemy(app)
 
 
@@ -37,6 +55,21 @@ def index():
         ret += str(v) + '<br>'
 
     return f"Hello<br> {ret}"
+
+
+@app.route('/send')
+def send():
+    send_mail('rajkonkret660@gmail.com', "Nowy user", 'mail/new_user', user='Admin')
+    return "Hallo mail"
+
+
+def send_mail(to, subject, template, **kwargs):
+    msg = Message(app.config['FLASKY_MAIL_SUBJECT'] + subject,
+                  sender=app.config["FLASKY_MAIL_SENDER"], recipients=[to])
+    msg.body = render_template(template + '.txt', **kwargs)
+    msg.html = render_template(template + '.html', **kwargs)
+    mail.send(msg)
+
 
 
 if __name__ == '__main__':
