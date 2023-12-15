@@ -12,6 +12,9 @@ class Vendor(db.Model):
     priority = db.Column(db.Integer)
     active = db.Column(db.Boolean)
 
+    def __repr__(self):
+        return f"Vendor {self.id}/{self.name}"
+
 
 @app.route('/')
 def index():
@@ -26,10 +29,12 @@ def index():
     # db.session.commit()
 
     vendors = Vendor.query.all()
+    print(Vendor.query.filter(Vendor.active == True).all())  # [Vendor 1/Microsoft, Vendor 2/Samsung]
+    print(Vendor.query.filter(Vendor.name.like('%t%')).all())  # [Vendor 1/Microsoft, Vendor 2/Samsung]
 
-    ret= ''
+    ret = ''
     for v in vendors:
-        ret += v.name+'<br>'
+        ret += str(v) + '<br>'
 
     return f"Hello<br> {ret}"
 
